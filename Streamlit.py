@@ -1,10 +1,5 @@
 import streamlit as st
-import pandas as pd
-import geopandas as gpd
-import folium
-import branca.colormap as cm
-import json
-from streamlit_folium import folium_static
+
 
 
 st.set_page_config(layout="wide")
@@ -42,4 +37,4 @@ st.markdown("<p style='margin-left:1400px; color: red;'>Paragraf</p>", unsafe_al
 
 
 
-st.write("check out this [link](https://share.streamlit.io/as1812/proiectdiploma/StreamlitPg2.py")
+st.write("check out this [link](https://share.streamlit.io/as1812/proiectdiploma/StreamlitPg2.py)")
