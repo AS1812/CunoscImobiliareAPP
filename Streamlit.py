@@ -42,4 +42,4 @@ st.markdown("<p style='margin-left:1400px; color: red;'>Paragraf</p>", unsafe_al
 
 
 
-st.write("check out this [link](https://github.com/AS1812/streamlit-example/blob/master/streamlit_app.py)")
+st.write("check out this [link](https://share.streamlit.io/as1812/proiectdiploma/StreamlitPg2.py")
