@@ -1,4 +1,4 @@
-#import streamlit as st
+import streamlit as st
 #import pandas as pd
 #import geopandas as gpd
 import folium
@@ -6,6 +6,7 @@ import folium
 import json
 from streamlit_folium import folium_static
 
+st.set_page_config(layout="wide")
 
 data_geo = json.load(open('mapz-20220528-002745.geojson'))
 
