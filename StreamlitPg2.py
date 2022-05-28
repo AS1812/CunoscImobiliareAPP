@@ -1,8 +1,5 @@
 import streamlit as st
-#import pandas as pd
-#import geopandas as gpd
 import folium
-#import branca.colormap as cm
 import json
 from streamlit_folium import folium_static
 
