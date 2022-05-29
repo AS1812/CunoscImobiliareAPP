@@ -70,9 +70,9 @@ sql = '''select id, locatieapartament as text, AVG(Pret) AS PretMediu, Min(Pret)
        group by locatieapartament;'''
 
 df4 = pd.read_sql_query(sql, sqlEngine, index_col='id')
-df4.to_csv('df41.csv')
+df4.to_csv('sql_query.csv')
 #df4.to_csv('timisoara_date.csv')
-df4_final=pd.read_csv('df41.csv')
+df4_final=pd.read_csv('sql_query.csv')
 fname='map.geojson'
 nil = gpd.read_file(fname)
 nil = nil[['id','geometry']]
