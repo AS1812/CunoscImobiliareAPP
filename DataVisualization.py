@@ -1,5 +1,7 @@
+import folium
 import sqlalchemy
 import pandas as pd
+import geopandas as gpd
 import plotly.express as px
 import matplotlib.pyplot as plt
 
@@ -7,7 +9,7 @@ sqlEngine = sqlalchemy.create_engine('mysql+pymysql://AS:Bella-4-ever1556@localh
 dbConnection = sqlEngine.connect()
 tableName = "Imobiliare"
 
-
+"""
 sql = "select distinct locatieapartament, count(*) as nr_aparitii " \
       "from imobiliare " \
       "group by locatieapartament " \
@@ -50,3 +52,43 @@ scatter = px.scatter(df3,
 scatter.update_layout(xaxis_title="Preț",
                       yaxis_title="Metri pătrați", )
 scatter.show()
+"""
+sql = '''select id, locatieapartament as text, AVG(Pret) AS PretMediu, Min(Pret) as PretMinim, MAX(Pret) as PretMaxim, 
+       AVG(MetriPatrati) as MetriPartrati, Pret/MetriPatrati as PretMetru from imobiliare 
+  	     where locatieapartament like 'Timisoara, zona Complex Studentesc' 
+  	     or locatieapartament like 'Timisoara, zona Elisabetin' 
+   	     or locatieapartament like 'Timisoara, zona Iosefin' 
+    	 or locatieapartament like 'Timisoara, zona Blascovici' 
+     	 or locatieapartament like 'Timisoara, zona Torontalului' 
+      	 or locatieapartament like 'Timisoara, zona Torontalului' 
+       	 or locatieapartament like 'Timisoara, zona Aradului' 
+         or locatieapartament like 'Timisoara, zona Lipovei' 
+         or locatieapartament like 'Timisoara, zona Telegrafului' 
+	     or locatieapartament like 'Timisoara, zona Dorobantilor' 
+	     or locatieapartament like 'Timisoara, zona Fabric' 
+	     or locatieapartament like 'Timisoara, zona Cetatii' 
+       group by locatieapartament;'''
+
+df4 = pd.read_sql_query(sql, sqlEngine, index_col='id')
+#df4.to_csv('timisoara_date.csv')
+
+fname='map.geojson'
+nil = gpd.read_file(fname)
+nil = nil[['id','geometry']]
+df_final = nil.merge(df4, left_on="id", right_on="id", how="outer")
+#df_final.to_csv("final_csv.csv")
+
+m = folium.Map(location=[45.752, 21.22], zoom_start=13)
+
+choropleth1 = folium.Choropleth(
+    geo_data='map.geojson',
+    data=df_final,
+    columns=['id', "PretMetru"],
+    key_on='feature.properties.id',
+    fill_color='BuGn',
+    nan_fill_color="white",
+    fill_opacity=0.7,
+    line_opacity=0.2
+).geojson.add_to(m)
+
+m.save('index.html')
