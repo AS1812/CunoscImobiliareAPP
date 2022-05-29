@@ -15,11 +15,11 @@ m = folium.Map(location=[45.752, 21.22], zoom_start=13)
 choice = ['PretMediu', 'PretMinim', 'PretMaxim', 'PretMetru']
 choice_selected = st.selectbox("Select Choice", choice)
 
-df4_final=pd.read_csv('sql_query.csv')
+df=pd.read_csv('sql_query.csv')
 fname='map.geojson'
 nil = gpd.read_file(fname)
 nil = nil[['id','geometry']]
-df_final = nil.merge(df4_final, left_on="id", right_on="id", how="outer")
+df_final = nil.merge(df, left_on="id", right_on="id", how="outer")
 
 
 m = folium.Map(location=[45.752, 21.22], zoom_start=13)
