@@ -32,7 +32,8 @@ choropleth1 = folium.Choropleth(
     line_color = 'White',
     nan_fill_color="White",
     fill_opacity=0.7,
-    line_opacity=0.2
+    line_opacity=0.2,
+    legend_name=choice_selected
 ).geojson.add_to(m)
 
 style_function = lambda x: {'fillColor': '#ffffff',
