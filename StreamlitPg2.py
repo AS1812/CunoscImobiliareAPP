@@ -63,7 +63,7 @@ NIL = folium.features.GeoJson(
     control=False,
     highlight_function=highlight_function,
     tooltip=folium.features.GeoJsonTooltip(
-        fields=['text', 'PretMediu'],
+        fields=['text', 'PretMetru'],
         aliases=['Nume Regiune: ', 'Preț mediu per metru pătrat '],
         style=("background-color: white; color: #333333; font-family: arial; font-size: 12px; padding: 10px;")
     )
