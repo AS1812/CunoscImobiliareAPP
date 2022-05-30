@@ -30,7 +30,7 @@ choropleth1 = folium.Choropleth(
     key_on='feature.properties.id',
     fill_color='Blues',
     line_color = 'White',
-    nan_fill_color = "White",
+    nan_fill_color="White",
     fill_opacity=0.7,
     line_opacity=0.2
 ).geojson.add_to(m)

@@ -34,5 +34,5 @@ video_html = """
 
 st.markdown(video_html, unsafe_allow_html=True)
 
-st.markdown("<a href='https://share.streamlit.io/as1812/proiectdiploma/StreamlitPg2.py' style='font-family:courier; font-size:300%; text-decoration:none; color: white; position: absolute; top: 750px; right: 0pt;'>Click pentru hartă & mai multe</a>", unsafe_allow_html=True)
+st.markdown("<a href='https://share.streamlit.io/as1812/proiectdiploma/StreamlitPg2.py' style='font-family:courier; font-size:300%; text-decoration:none; color: white; position: absolute; top: 750px; right: 0pt;'>Click pentru hartă & statistici</a>", unsafe_allow_html=True)
 
