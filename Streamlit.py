@@ -25,6 +25,7 @@ video_html = """
 		}
 
 		</style>	
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 		<video autoplay muted loop id="myVideo">
 		  <source src="https://dl.dropbox.com/s/le1r7z0v1ho7g0b/Timisoara.avi?dl=0">
 		  Your browser does not support HTML5 video.
