@@ -13,6 +13,7 @@ m = folium.Map(location=[45.752, 21.22], zoom_start=13)
 
 
 choice = ['PretMediu', 'PretMinim', 'PretMaxim', 'PretMetru']
+
 choice_selected = st.selectbox("Select Choice", choice)
 
 df=pd.read_csv('sql_query.csv')
@@ -21,7 +22,6 @@ nil = gpd.read_file(fname)
 nil = nil[['id','geometry']]
 df_final = nil.merge(df, left_on="id", right_on="id", how="outer")
 
-
 m = folium.Map(location=[45.752, 21.22], zoom_start=13)
 
 choropleth1 = folium.Choropleth(
@@ -29,32 +29,20 @@ choropleth1 = folium.Choropleth(
     data=df_final,
     columns=['id', choice_selected],
     key_on='feature.properties.id',
-    fill_color='YlGn',
-    fill_opacity=0.7,
-    line_opacity=0.2
-).geojson.add_to(m)
-
-
-m = folium.Map(location=[45.752, 21.22], zoom_start=13)
-
-choropleth1 = folium.Choropleth(
-    geo_data='map.geojson',
-    data=df_final,
-    columns=['id', choice_selected],
-    key_on='feature.properties.id',
-    fill_color='BuGn',
-    nan_fill_color="white",
+    fill_color='Blues',
+    line_color = 'White',
+    nan_fill_color = "White",
     fill_opacity=0.7,
     line_opacity=0.2
 ).geojson.add_to(m)
 
 style_function = lambda x: {'fillColor': '#ffffff',
-                            'color': '#ffffff',
-                            'fillOpacity': 0.1,
-                            'weight': 0.2}
-highlight_function = lambda x: {'fillColor': '#000000',
-                                'color': '#000000',
-                                'fillOpacity': 0.50,
+                            'color': '#000000',
+                            'fillOpacity': 0.2,
+                            'weight': 0.1}
+highlight_function = lambda x: {'fillColor': '#263393',
+                                'color': '#ffffff',
+                                'fillOpacity': 0.85,
                                 'weight': 0.1}
 
 NIL = folium.features.GeoJson(
@@ -63,8 +51,8 @@ NIL = folium.features.GeoJson(
     control=False,
     highlight_function=highlight_function,
     tooltip=folium.features.GeoJsonTooltip(
-        fields=['text', 'PretMetru'],
-        aliases=['Nume Regiune: ', 'Preț mediu per metru pătrat '],
+        fields=['text', choice_selected],
+        aliases=['Nume Regiune: ', 'Reprezentare alegere '],
         style=("background-color: white; color: #333333; font-family: arial; font-size: 12px; padding: 10px;")
     )
 )
