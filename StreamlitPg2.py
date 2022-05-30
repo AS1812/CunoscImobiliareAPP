@@ -9,7 +9,8 @@ st.set_page_config(layout="wide")
 fname='map.geojson'
 nil = gpd.read_file(fname)
 
-m = folium.Map(location=[45.752, 21.22], zoom_start=13, tiles="CartoDB positron")
+m = folium.Map(location=[45.752, 21.22], zoom_start=13, tiles="CartoDB positron", name='Statistici imobiliare Timișoara',
+               attr="My Data attribution")
 
 
 choice = ['PretMediu', 'PretMinim', 'PretMaxim', 'PretMetru', 'NumarAnunturi']
@@ -29,11 +30,11 @@ choropleth1 = folium.Choropleth(
     columns=['id', choice_selected],
     key_on='feature.properties.id',
     fill_color='Blues',
-    line_color = 'White',
-    nan_fill_color="White",
+    nan_fill_color="black",
+    line_color='White',
     fill_opacity=0.7,
-    line_opacity=0.2,
-    legend_name=choice_selected
+    line_opacity=0.2
+
 ).geojson.add_to(m)
 
 style_function = lambda x: {'fillColor': '#ffffff',
@@ -46,8 +47,8 @@ highlight_function = lambda x: {'fillColor': '#263393',
                                 'weight': 0.1}
 
 NIL = folium.features.GeoJson(
-
     df_final,
+
     style_function=style_function,
     control=False,
     highlight_function=highlight_function,
@@ -62,4 +63,4 @@ m.keep_in_front(NIL)
 folium.LayerControl().add_to(m)
 
 
-folium_static(m, width=1600, height=900)
+folium_static(m, width=1750, height=900)

@@ -89,7 +89,8 @@ choropleth1 = folium.Choropleth(
     fill_color='BuGn',
     nan_fill_color="white",
     fill_opacity=0.7,
-    line_opacity=0.2
+    line_opacity=0.2,
+
 ).geojson.add_to(m)
 
 style_function = lambda x: {'fillColor': '#ffffff',
