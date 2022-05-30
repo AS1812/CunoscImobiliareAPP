@@ -54,7 +54,7 @@ scatter.update_layout(xaxis_title="Preț",
 scatter.show()
 """
 sql = '''select id, locatieapartament as text, AVG(Pret) AS PretMediu, Min(Pret) as PretMinim, MAX(Pret) as PretMaxim, 
-       AVG(MetriPatrati) as MetriPartrati, Pret/MetriPatrati as PretMetru from imobiliare 
+       AVG(MetriPatrati) as MetriPartrati, Pret/MetriPatrati as PretMetru, count(*) as NumarAnunturi from imobiliare 
   	     where locatieapartament like 'Timisoara, zona Complex Studentesc' 
   	     or locatieapartament like 'Timisoara, zona Elisabetin' 
    	     or locatieapartament like 'Timisoara, zona Iosefin' 
@@ -79,7 +79,7 @@ nil = nil[['id','geometry']]
 df_final = nil.merge(df4_final, left_on="id", right_on="id", how="outer")
 #df_final.to_csv("final_csv.csv")
 
-m = folium.Map(location=[45.752, 21.22], zoom_start=13)
+m = folium.Map(location=[45.752, 21.22], zoom_start=13, tiles= "CartoDB positron")
 
 choropleth1 = folium.Choropleth(
     geo_data='map.geojson',
@@ -112,6 +112,7 @@ NIL = folium.features.GeoJson(
         style=("background-color: white; color: #333333; font-family: arial; font-size: 12px; padding: 10px;")
     )
 )
+
 m.add_child(NIL)
 m.keep_in_front(NIL)
 folium.LayerControl().add_to(m)

@@ -1,12 +1,13 @@
-select locatieapartament, AVG(Pret) AS PretMediu, Min(Pret) as PretMinim, MAX(Pret) as PretMaxim, AVG(MetriPatrati) as MetriPartrati, Pret/MetriPatrati as PretMetru from imobiliare
+select locatieapartament, AVG(Pret) AS PretMediu, Min(Pret) as PretMinim, MAX(Pret) as PretMaxim,
+ AVG(MetriPatrati) as MetriPartrati, Pret/MetriPatrati as PretMetru, count(*) as NumarAnunturi from imobiliare
   	where locatieapartament like "Timisoara, zona Complex Studentesc"
   	or locatieapartament like "Timisoara, zona Elisabetin" 
    	or locatieapartament like "Timisoara, zona Iosefin" 
-    	or locatieapartament like "Timisoara, zona Blascovici"
-     	or locatieapartament like "Timisoara, zona Torontalului"
-      	or locatieapartament like "Timisoara, zona Torontalului"
-       	or locatieapartament like "Timisoara, zona Aradului"
-        or locatieapartament like "Timisoara, zona Lipovei"
+    or locatieapartament like "Timisoara, zona Blascovici"
+    or locatieapartament like "Timisoara, zona Torontalului"
+    or locatieapartament like "Timisoara, zona Torontalului"
+    or locatieapartament like "Timisoara, zona Aradului"
+    or locatieapartament like "Timisoara, zona Lipovei"
 	or locatieapartament like "Timisoara, zona Telegrafului"
 	or locatieapartament like "Timisoara, zona Dorobantilor"
 	or locatieapartament like "Timisoara, zona Fabric"
