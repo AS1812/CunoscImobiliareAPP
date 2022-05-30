@@ -54,7 +54,7 @@ NIL = folium.features.GeoJson(
     tooltip=folium.features.GeoJsonTooltip(
         fields=['text', choice_selected],
         aliases=['Nume Regiune: ', 'Reprezentare alegere '],
-        style=("background-color: white; color: #333333; font-family: arial; font-size: 14px; padding: 10px;")
+        style=("background-color: white; color: #333333; font-family: arial; font-size: 13.5px; padding: 10px;")
     )
 )
 m.add_child(NIL)
