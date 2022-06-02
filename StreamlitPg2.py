@@ -14,7 +14,7 @@ m = folium.Map(location=[45.752, 21.22], zoom_start=13, tiles="CartoDB positron"
                name='Statistici imobiliare Timișoara',
                attr="My Data attribution")
 
-col1, col2, col3 = st.columns((1,3,2))
+col1, col2 = st.columns((1.4, 4))
 with col1:
     choice = ['PretMediu', 'PretMinim', 'PretMaxim', 'PretMetru', 'NumarAnunturi']
 
@@ -59,7 +59,7 @@ with col1:
         width='100%',
         reload_data=True
     )
-    st.markdown(f""" """, unsafe_allow_html=True)
+    st.markdown(f""" /home/appuser/venv/bin/python -m pip install --upgrade pip""", unsafe_allow_html=True)
 
 
 choropleth1 = folium.Choropleth(
@@ -123,13 +123,13 @@ fig.update_layout(
     width=1350,
     height=700)
 
-with col3:
+with col2:
     st.plotly_chart(fig, use_container_width=True)
 
 fig2 = px.bar_polar(df_final, r=choice_selected, theta="NumeZonă",
                     color=[color, color, color, color, color, color, color, color, color, color, color],
                     color_discrete_map="identity"
                     )
-with col3:
+with col1:
     st.plotly_chart(fig2, use_container_width=True)
 
