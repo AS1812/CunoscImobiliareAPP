@@ -155,7 +155,7 @@ fig2.update_layout(
             backgroundcolor="rgba(0, 0, 0,0)",
             gridcolor=color,
             showbackground=True,
-            zerolinecolor="white", ),
+            zerolinecolor="white"),
         yaxis=dict(
             backgroundcolor="rgba(0, 0, 0,0)",
             gridcolor=color,
