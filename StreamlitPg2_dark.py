@@ -10,7 +10,7 @@ st.set_page_config(layout="wide")
 fname = 'map.geojson'
 nil = gpd.read_file(fname)
 
-m = folium.Map(location=[45.752, 21.22], zoom_start=13, tiles="CartoDB positron",
+m = folium.Map(location=[45.752, 21.22], zoom_start=13, tiles="CartoDB dark_matter",
                name='Statistici imobiliare Timișoara',
                attr="My Data attribution")
 
@@ -43,7 +43,6 @@ with col1:
     .paragraf {{
         font-family: Helvetica;
         font-size: 20px;
-        height: 60px;
         color:{color};
     }}
     </style>
@@ -56,9 +55,10 @@ with col1:
         data_return_mode='AS_INPUT',
         update_mode='MODEL_CHANGED',
         fit_columns_on_grid_load=True,
-        height=350,
+        height=360,
         width='100%',
-        reload_data=True
+        reload_data=True,
+        theme='dark'
     )
 
     st.markdown(f""" """, unsafe_allow_html=True)
@@ -114,7 +114,7 @@ fig = px.scatter_3d(
     color=[color, color, color, color, color, color, color, color, color, color, color],
     color_discrete_map="identity")
 
-fig.update_layout(title="Reprezentare 3d a opțiunii selectate")
+fig.update_layout(title="Reprezentare 3d a opțiunii selectate", paper_bgcolor='#030312')
 fig.update_layout(
     scene={
         'camera_eye': {"x": 2, "y": 0.6, "z": 1},
@@ -124,7 +124,24 @@ fig.update_layout(
 
     width=1350,
     height=700)
-
+fig.update_layout(
+    scene=dict(
+        xaxis=dict(
+            backgroundcolor="rgba(0, 0, 0,0)",
+            gridcolor=color,
+            showbackground=True,
+            zerolinecolor="white", ),
+        yaxis=dict(
+            backgroundcolor="rgba(0, 0, 0,0)",
+            gridcolor=color,
+            showbackground=True,
+            zerolinecolor="white"),
+        zaxis=dict(
+            backgroundcolor="rgba(0, 0, 0,0)",
+            gridcolor=color,
+            showbackground=True,
+            zerolinecolor="white", ), ),
+)
 with col2:
     st.plotly_chart(fig, use_container_width=True)
 
@@ -132,6 +149,20 @@ fig2 = px.bar_polar(df_final, r=choice_selected, theta="NumeZonă",
                     color=[color, color, color, color, color, color, color, color, color, color, color],
                     color_discrete_map="identity"
                     )
+fig2.update_layout(
+    scene=dict(
+        xaxis=dict(
+            backgroundcolor="rgba(0, 0, 0,0)",
+            gridcolor=color,
+            showbackground=True,
+            zerolinecolor="white", ),
+        yaxis=dict(
+            backgroundcolor="rgba(0, 0, 0,0)",
+            gridcolor=color,
+            showbackground=True,
+            zerolinecolor="white"), ),
+)
 with col1:
     st.plotly_chart(fig2, use_container_width=True)
+
 
