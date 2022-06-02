@@ -4,5 +4,4 @@ streamlit
 pandas
 geopandas
 plotly
-st_aggrid
 AgGrid
