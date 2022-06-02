@@ -59,7 +59,7 @@ with col1:
         width='100%',
         reload_data=True
     )
-    st.markdown(f""" /home/appuser/venv/bin/python -m pip install --upgrade pip""", unsafe_allow_html=True)
+    st.markdown(f""" """, unsafe_allow_html=True)
 
 
 choropleth1 = folium.Choropleth(
