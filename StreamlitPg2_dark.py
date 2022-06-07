@@ -194,10 +194,34 @@ fig.update_layout(
     width=425,
     height=400)
 
+if choice_selected2 == '1 Cameră' or choice_selected2 == '2 Camere':
+    fig4 = px.density_contour(df_final, y=choice_selected1, x="ZonăApartament",
+                        color=[color, color, color, color, color, color, color, color, color, color, color],
+                        color_discrete_map="identity",
+                        template="plotly_dark",
+                        height=425,
+                        width=500
+                        )
+
+else:
+    fig4 = px.density_contour(df_final, y=choice_selected1, x="ZonăApartament",
+                        color=[color, color, color, color, color, color, color, color, color, color],
+                        color_discrete_map="identity",
+                        template="plotly_dark",
+                        height=425,
+                        width=500
+                        )
+
+fig4.update_layout(
+    paper_bgcolor='rgba(0,0,0,0)',
+    plot_bgcolor='rgba(0,0,0,0)'
+)
+
+
 with col3:
     st.plotly_chart(fig, use_container_width=True)
 
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig4, use_container_width=True)
 
 if choice_selected2 == '1 Cameră' or choice_selected2 == '2 Camere':
     fig2 = px.bar_polar(df_final, r=choice_selected1, theta="ZonăApartament",
