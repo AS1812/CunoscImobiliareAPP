@@ -53,13 +53,13 @@ scatter.update_layout(xaxis_title="Preț",
                       yaxis_title="Metri pătrați", )
 scatter.show()
 """
+"""
 sql = '''select id, locatieapartament as text, AVG(Pret) AS PretMediu, Min(Pret) as PretMinim, MAX(Pret) as PretMaxim, 
        AVG(MetriPatrati) as MetriPartrati, Pret/MetriPatrati as PretMetru, count(*) as NumarAnunturi from imobiliare 
   	     where locatieapartament like 'Timisoara, zona Complex Studentesc' 
   	     or locatieapartament like 'Timisoara, zona Elisabetin' 
    	     or locatieapartament like 'Timisoara, zona Iosefin' 
     	 or locatieapartament like 'Timisoara, zona Blascovici' 
-     	 or locatieapartament like 'Timisoara, zona Torontalului' 
       	 or locatieapartament like 'Timisoara, zona Torontalului' 
        	 or locatieapartament like 'Timisoara, zona Aradului' 
          or locatieapartament like 'Timisoara, zona Lipovei' 
@@ -119,3 +119,41 @@ m.keep_in_front(NIL)
 folium.LayerControl().add_to(m)
 
 m.save('index.html')
+"""
+
+
+""" Fig update - axes
+fig.update_layout(
+    scene=dict(
+        xaxis=dict(
+            backgroundcolor="rgba(0, 0, 0,0)",
+            gridcolor=color,
+            showbackground=True,
+            zerolinecolor="white", ),
+        yaxis=dict(
+            backgroundcolor="rgba(0, 0, 0,0)",
+            gridcolor=color,
+            showbackground=True,
+            zerolinecolor="white"),
+        zaxis=dict(
+            backgroundcolor="rgba(0, 0, 0,0)",
+            gridcolor=color,
+            showbackground=True,
+            zerolinecolor="white", ), ),
+)
+"""
+
+
+sql = '''select id, count(*) as NumarAnunturi, LocatieApartament as ZonăApartament, 
+       AVG(Pret) AS PretMediu, Min(Pret) as PretMinim, MAX(Pret) as PretMaxim, 
+       AVG(MetriPatrati) as MetriPartrati_InMedie, Pret/MetriPatrati as PretMediu_MetruPatrat from imobiliare 
+  	     where NumarCamere = 5 or NumarCamere = 6 and locatieapartament in ("Timisoara, zona Complex Studentesc",
+  	     "Timisoara, zona Elisabetin", "Timisoara, zona Iosefin", 
+  	     "Timisoara, zona Blascovici", "Timisoara, zona Torontalului",
+  	     "Timisoara, zona Aradului",  "Timisoara, zona Lipovei", 
+  	     "Timisoara, zona Telegrafului", "Timisoara, zona Dorobantilor", 
+  	     "Timisoara, zona Fabric", "Timisoara, zona Cetatii") 
+	     group by ZonăApartament;'''
+
+df5 = pd.read_sql_query(sql, sqlEngine, index_col="ZonăApartament")
+df5.to_csv('sql_query_4cam.csv')
