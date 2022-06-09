@@ -47,7 +47,7 @@ m = folium.Map(location=[45.758, 21.227], zoom_start=12, tiles="CartoDB dark_mat
                name='Statistici imobiliare Timișoara',
                attr="My Data attribution")
 
-col1, col2, col3 = st.columns((1, 1, 1))
+col1, col2, col3 = st.columns((1, 1.5, 1.5))
 
 with col1:
     choice2 = ['1 Cameră', '2 Camere', '3 Camere', '4 Camere']
@@ -136,7 +136,7 @@ m.add_child(NIL)
 m.keep_in_front(NIL)
 folium.LayerControl().add_to(m)
 with col3:
-    folium_static(m, width=500, height=360)
+    folium_static(m, width=500, height=400)
 
 if choice_selected2 == '1 Cameră' or choice_selected2 == '2 Camere':
     fig = px.scatter_3d(
