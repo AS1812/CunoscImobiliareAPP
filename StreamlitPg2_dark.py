@@ -47,12 +47,9 @@ m = folium.Map(location=[45.758, 21.227], zoom_start=12, tiles="CartoDB dark_mat
                name='Statistici imobiliare Timișoara',
                attr="My Data attribution")
 
-
 col1, col2, col3 = st.columns((1, 1, 1))
 
-
 with col1:
-
     choice2 = ['1 Cameră', '2 Camere', '3 Camere', '4 Camere']
 
     choice_selected2 = st.radio("Alegeți numărul de camere. ", choice2,
@@ -90,16 +87,14 @@ if choice_selected2 == '3 Camere':
 if choice_selected2 == '4 Camere':
     df_final = nil.merge(cam4, left_on="text", right_on="ZonăApartament", how="inner")
 
-
-with col2:
-
+with col1:
     grid_response = AgGrid(
         df_final[['ZonăApartament', choice_selected1]],
         data_return_mode='AS_INPUT',
         update_mode='MODEL_CHANGED',
         fit_columns_on_grid_load=True,
         height=360,
-        width='100%',
+        width="100%",
         reload_data=True,
         theme='dark'
     )
@@ -143,7 +138,6 @@ folium.LayerControl().add_to(m)
 with col3:
     folium_static(m, width=500, height=360)
 
-
 if choice_selected2 == '1 Cameră' or choice_selected2 == '2 Camere':
     fig = px.scatter_3d(
         df_final,
@@ -183,10 +177,8 @@ fig.update_layout(
     margin=dict(l=0, r=0, t=0, b=0)
 )
 
-
 with col3:
     st.plotly_chart(fig, use_container_width=True)
-
 
 if choice_selected2 == '1 Cameră' or choice_selected2 == '2 Camere':
     fig2 = px.bar_polar(df_final, r=choice_selected1, theta="ZonăApartament",
@@ -209,25 +201,18 @@ fig2.update_layout(
     margin=dict(l=55, r=55, t=55, b=55)
 )
 
-with col2:
-
-    st.plotly_chart(fig2, use_container_width=True)
-
-
-
 if choice_selected2 == '1 Cameră' or choice_selected2 == '2 Camere':
 
-
     fig3 = px.bar(df_final, x="ZonăApartament", y=choice_selected1,
-                 color=[color, color, color, color, color, color, color, color, color, color, color],
-                 color_discrete_map="identity",
-                 template="plotly_dark")
+                  color=[color, color, color, color, color, color, color, color, color, color, color],
+                  color_discrete_map="identity",
+                  template="plotly_dark")
 
 else:
     fig3 = px.bar(df_final, x="ZonăApartament", y=choice_selected1,
-                 color=[color, color, color, color, color, color, color, color, color, color],
-                 color_discrete_map="identity",
-                 template="plotly_dark")
+                  color=[color, color, color, color, color, color, color, color, color, color],
+                  color_discrete_map="identity",
+                  template="plotly_dark")
 
 fig3.update_layout(
     paper_bgcolor='rgba(0,0,0,0)',
@@ -236,5 +221,8 @@ fig3.update_layout(
     margin=dict(l=55, r=55, t=55, b=55)
 )
 
-with col1:
+with col2:
     st.plotly_chart(fig3, use_container_width=True)
+
+with col2:
+    st.plotly_chart(fig2, use_container_width=True)
