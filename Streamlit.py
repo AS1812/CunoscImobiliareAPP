@@ -21,7 +21,7 @@ video_html = """
 		
         """
 
-redirect = "<meta http-equiv='refresh' content='8; URL=https://share.streamlit.io/as1812/proiectdiploma/StreamlitPg2_dark.py' />"
+redirect = "<meta http-equiv='refresh' content='10; URL=https://share.streamlit.io/as1812/proiectdiploma/StreamlitPg2_dark.py' />"
 
 st.markdown(redirect, unsafe_allow_html=True)
 st.markdown(video_html, unsafe_allow_html=True)
