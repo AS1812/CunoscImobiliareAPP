@@ -16,7 +16,7 @@ video_html = """
 		</style>	
 		
 		<video autoplay muted id="myVideo" width="100%" height="auto">
-		  <source src="https://dl.dropbox.com/s/hqc5vo9q1tfhzna/Timisoara_5s.mp4?dl=0">
+		  <source src="https://dl.dropbox.com/s/z7eyd6jmvnfajjd/Timisoara_8s.mp4?dl=0">
 		</video>
 		
         """

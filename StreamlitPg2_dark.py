@@ -5,7 +5,6 @@ import folium
 import geopandas as gpd
 import plotly.express as px
 from st_aggrid import AgGrid
-import plotly.graph_objects as go
 
 st.set_page_config(layout="wide")
 
@@ -27,10 +26,10 @@ def set_bg():
 
          }}
          .css-18e3th9 {{
-             padding-top: 33px;
+             padding-top: 30px;
              padding-bottom: 0px;
-             padding-left: 50px;
-             padding-right: 0px;
+             padding-left: 80px;
+             padding-right: 80px;
          }}
 
          </style>
@@ -44,25 +43,15 @@ set_bg()
 fname = 'map.geojson'
 nil = gpd.read_file(fname)
 
-m = folium.Map(location=[45.758, 21.223], zoom_start=12.5, tiles="CartoDB dark_matter",
+m = folium.Map(location=[45.758, 21.227], zoom_start=12, tiles="CartoDB dark_matter",
                name='Statistici imobiliare Timișoara',
                attr="My Data attribution")
 
 
-col1, col2, col3, col4 = st.columns((1, 1, 1, 1))
+col1, col2, col3 = st.columns((1, 1, 1))
 
 
 with col1:
-    choice1 = ['PretMediu', 'PretMinim', 'PretMaxim', 'PretMediu_MetruPatrat', 'NumarAnunturi', 'MetriPartrati_InMedie']
-
-    choice_selected1 = st.selectbox("Alegeți o opțiune pentru a fi reprezentată. De menționat este că prețurile sunt în Euro.", choice1,
-                                    help='Alegerea selectată urmează să fie '
-                                         'reprezentată pe hartă, în fiecare regiune.'
-                                         'Spre exemplu, daca alegerea făcută indică'
-                                         '"PretMediu", prețul mediu va fi afișat în'
-                                         'fiecare regiune, alături de numele acesteia,'
-                                         'totodată facându-se și o departajare '
-                                         'de culoare.')
 
     choice2 = ['1 Cameră', '2 Camere', '3 Camere', '4 Camere']
 
@@ -70,8 +59,19 @@ with col1:
                                 help='Alegerea selectată reprezintă numărul de '
                                      'camere  dorit')
 
+    choice1 = ['PretMediu', 'PretMinim', 'PretMaxim', 'PretMediu_MetruPatrat', 'NumarAnunturi', 'MetriPartrati_InMedie']
+
+    choice_selected1 = st.radio("Alegeți o opțiune pentru reprezentare. "
+                                " Preturile exprimate sunt in euro cu TVA.", choice1,
+                                help='Alegerea selectată urmează să fie '
+                                     'reprezentată pe hartă, în fiecare regiune.'
+                                     'Spre exemplu, daca alegerea făcută indică'
+                                     '"PretMediu", prețul mediu va fi afișat în'
+                                     'fiecare regiune, alături de numele acesteia,'
+                                     'totodată facându-se și o departajare '
+                                     'de culoare.')
+
     color = st.color_picker('Alegeți o culoare pentru a evdenția zonele', '#6edab2')
-    st.write('Culoarea curentă este: ', color)
 
 fname = 'map.geojson'
 nil = gpd.read_file(fname)
@@ -90,18 +90,8 @@ if choice_selected2 == '3 Camere':
 if choice_selected2 == '4 Camere':
     df_final = nil.merge(cam4, left_on="text", right_on="ZonăApartament", how="inner")
 
-with col1:
-    st.markdown(f"""
-    <style>
-    .paragraf {{
-        font-family: Helvetica;
-        font-size: 20px;
-        color:{color};
-    }}
-    </style>
-    """, unsafe_allow_html=True)
 
-    st.markdown('<p class="paragraf">Tabel cu zonele și cu opțiunea selectată. </p>', unsafe_allow_html=True)
+with col2:
 
     grid_response = AgGrid(
         df_final[['ZonăApartament', choice_selected1]],
@@ -113,8 +103,6 @@ with col1:
         reload_data=True,
         theme='dark'
     )
-
-
 
 choropleth1 = folium.Choropleth(
     geo_data='map.geojson',
@@ -152,8 +140,8 @@ NIL = folium.features.GeoJson(
 m.add_child(NIL)
 m.keep_in_front(NIL)
 folium.LayerControl().add_to(m)
-with col4:
-    folium_static(m, width=490, height=500)
+with col3:
+    folium_static(m, width=500, height=360)
 
 
 if choice_selected2 == '1 Cameră' or choice_selected2 == '2 Camere':
@@ -191,85 +179,62 @@ fig.update_layout(
     },
     paper_bgcolor='rgba(0,0,0,0)',
     plot_bgcolor='rgba(0,0,0,0)',
-    width=425,
-    height=400)
-
-if choice_selected2 == '1 Cameră' or choice_selected2 == '2 Camere':
-    fig4 = px.density_contour(df_final, y=choice_selected1, x="ZonăApartament",
-                        color=[color, color, color, color, color, color, color, color, color, color, color],
-                        color_discrete_map="identity",
-                        template="plotly_dark",
-                        height=425,
-                        width=500
-                        )
-
-else:
-    fig4 = px.density_contour(df_final, y=choice_selected1, x="ZonăApartament",
-                        color=[color, color, color, color, color, color, color, color, color, color],
-                        color_discrete_map="identity",
-                        template="plotly_dark",
-                        height=425,
-                        width=500
-                        )
-
-fig4.update_layout(
-    paper_bgcolor='rgba(0,0,0,0)',
-    plot_bgcolor='rgba(0,0,0,0)'
+    autosize=True,
+    margin=dict(l=0, r=0, t=0, b=0)
 )
 
 
 with col3:
     st.plotly_chart(fig, use_container_width=True)
 
-    st.plotly_chart(fig4, use_container_width=True)
 
 if choice_selected2 == '1 Cameră' or choice_selected2 == '2 Camere':
     fig2 = px.bar_polar(df_final, r=choice_selected1, theta="ZonăApartament",
                         color=[color, color, color, color, color, color, color, color, color, color, color],
                         color_discrete_map="identity",
-                        template="plotly_dark",
-                        height=425,
-                        width=500
+                        template="plotly_dark"
                         )
 
 else:
     fig2 = px.bar_polar(df_final, r=choice_selected1, theta="ZonăApartament",
                         color=[color, color, color, color, color, color, color, color, color, color],
                         color_discrete_map="identity",
-                        template="plotly_dark",
-                        height=425,
-                        width=500
+                        template="plotly_dark"
                         )
 
 fig2.update_layout(
     paper_bgcolor='rgba(0,0,0,0)',
-    plot_bgcolor='rgba(0,0,0,0)'
+    plot_bgcolor='rgba(0,0,0,0)',
+    autosize=True,
+    margin=dict(l=55, r=55, t=55, b=55)
 )
+
+with col2:
+
+    st.plotly_chart(fig2, use_container_width=True)
 
 
 
 if choice_selected2 == '1 Cameră' or choice_selected2 == '2 Camere':
-    fig3 = px.violin(df_final, y=choice_selected1, x="ZonăApartament",
-                        color=[color, color, color, color, color, color, color, color, color, color, color],
-                        color_discrete_map="identity",
-                        template="plotly_dark",
-                        height=425,
-                        width=500
-                        )
+
+
+    fig3 = px.bar(df_final, x="ZonăApartament", y=choice_selected1,
+                 color=[color, color, color, color, color, color, color, color, color, color, color],
+                 color_discrete_map="identity",
+                 template="plotly_dark")
 
 else:
-    fig3 = px.violin(df_final, y=choice_selected1, x="ZonăApartament",
-                        color=[color, color, color, color, color, color, color, color, color, color],
-                        color_discrete_map="identity",
-                        template="plotly_dark",
-                        height=425,
-                        width=500
-                        )
+    fig3 = px.bar(df_final, x="ZonăApartament", y=choice_selected1,
+                 color=[color, color, color, color, color, color, color, color, color, color],
+                 color_discrete_map="identity",
+                 template="plotly_dark")
 
 fig3.update_layout(
     paper_bgcolor='rgba(0,0,0,0)',
-    plot_bgcolor='rgba(0,0,0,0)'
+    plot_bgcolor='rgba(0,0,0,0)',
+    autosize=True,
+    margin=dict(l=55, r=55, t=55, b=55)
 )
-with col2:
-    st.plotly_chart(fig2, use_container_width=True)
+
+with col1:
     st.plotly_chart(fig3, use_container_width=True)
