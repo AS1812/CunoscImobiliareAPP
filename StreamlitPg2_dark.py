@@ -10,12 +10,7 @@ st.set_page_config(layout="wide")
 
 
 def set_bg():
-    '''
-    A function to unpack an image from url and set as bg.
-    Returns
-    -------
-    The background.
-    '''
+
 
     st.markdown(
         f"""
