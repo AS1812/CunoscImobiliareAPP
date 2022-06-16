@@ -68,7 +68,7 @@ with col1:
                                      'totodată facându-se și o departajare '
                                      'de culoare.')
 
-    color = st.color_picker('Alegeți o culoare pentru a evdenția zonele', '#6edab2')
+    color = st.color_picker(' ', '#6edab2')
 
 fname = 'map.geojson'
 nil = gpd.read_file(fname)
@@ -135,6 +135,7 @@ NIL = folium.features.GeoJson(
 m.add_child(NIL)
 m.keep_in_front(NIL)
 folium.LayerControl().add_to(m)
+
 with col3:
     folium_static(m, width=500, height=400)
 

@@ -25,7 +25,7 @@ if nr_pagini - int(nr_pagini) != 0:  # conditia de asigurare a corectitudinii nu
 else:
     nr_pagini = int(nr_pagini)
 
-nr_pg = 10  # doar pentru test, in rest se foloseste nr_pagini"
+nr_pg = 10  # doar pentru test, in rest se foloseste variabila nr_pagini"
 
 page = 1
 while page <= nr_pagini:

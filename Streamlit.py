@@ -25,5 +25,3 @@ redirect = "<meta http-equiv='refresh' content='8; URL=https://share.streamlit.i
 
 st.markdown(redirect, unsafe_allow_html=True)
 st.markdown(video_html, unsafe_allow_html=True)
-
-
