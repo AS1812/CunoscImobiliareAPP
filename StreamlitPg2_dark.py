@@ -63,7 +63,7 @@ with col1:
                                      'totodată facându-se și o departajare '
                                      'de culoare.')
 
-    color = st.color_picker(' ', '#6edab2')
+    color = st.color_picker(' ', '#3FCCE6')
 
 fname = 'map.geojson'
 nil = gpd.read_file(fname)
