@@ -94,6 +94,22 @@ with col1:
         theme='dark'
     )
 
+    Link_Figma = f"""
+    		<style>
+            
+    		#Link {{
+    		  position: fixed;
+    		  bottom: 50px;
+    		  color: {color}
+
+    		}}
+
+    		</style>	
+
+    		<a href="https://www.figma.com/file/cpSU7EkLWqVp4pwA8ztZjU/Proiect_diploma?node-id=0%3A1" id="Link">Prototip FIGMA - InfoGraficeTM</a> 
+
+            """
+    st.markdown(Link_Figma, unsafe_allow_html=True)
 choropleth1 = folium.Choropleth(
     geo_data='map.geojson',
     data=df_final,
