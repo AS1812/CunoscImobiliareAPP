@@ -106,7 +106,8 @@ with col1:
 
     		</style>	
 
-    		<a href="https://www.figma.com/file/cpSU7EkLWqVp4pwA8ztZjU/Proiect_diploma?node-id=0%3A1" id="Link">Prototip FIGMA - InfoGraficeTM</a> 
+    		<a href="https://www.figma.com/proto/cpSU7EkLWqVp4pwA8ztZjU/Proiect_diploma?node-id=1%3A406&scaling=min-zoom&page-id=0%3A1&starting-point-node-id=1%3A406" id="Link">
+    		Prototip FIGMA - InfoGraficeTM</a> 
 
             """
     st.markdown(Link_Figma, unsafe_allow_html=True)
