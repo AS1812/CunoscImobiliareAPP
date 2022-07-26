@@ -111,7 +111,7 @@ with col1:
 
             """
     st.markdown(Link_Figma, unsafe_allow_html=True)
-choropleth1 = folium.Choropleth(
+    choropleth1 = folium.Choropleth(
     geo_data='map.geojson',
     data=df_final,
     columns=['ZonăApartament', choice_selected1],
