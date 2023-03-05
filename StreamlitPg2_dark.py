@@ -91,7 +91,7 @@ with col1:
         height=360,
         width="100%",
         reload_data=True,
-        theme='dark'
+        theme='balham'
     )
 
     Link_Figma = f"""
