@@ -174,3 +174,4 @@ fig.update_layout(
     autosize=True,
     margin=dict(l=0, r=0, t=0, b=0)
 )
+
