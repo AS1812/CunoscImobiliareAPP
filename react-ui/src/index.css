@@ -1,0 +1,169 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-accent: #6366F1;
+  --color-accent-rgb: 99, 102, 241;
+}
+
+@layer base {
+  body {
+    @apply antialiased transition-colors duration-200 ease-in-out;
+  }
+
+  body.dark {
+    @apply bg-gray-900 text-gray-100;
+  }
+}
+
+@layer components {
+  .card {
+    @apply relative bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden transition-all duration-200 hover:shadow-md;
+  }
+
+  .card-header {
+    @apply p-4 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between;
+  }
+
+  .card-title {
+    @apply text-xl font-semibold text-gray-800 dark:text-white;
+  }
+
+  .card-body {
+    @apply p-4;
+  }
+
+  .btn {
+    @apply px-4 py-2 rounded-lg font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-primary {
+    @apply bg-accent-500 hover:bg-accent-600 text-white focus:ring-accent-500/50;
+  }
+
+  .btn-secondary {
+    @apply bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-900 dark:text-white focus:ring-gray-500/50;
+  }
+
+  .btn-outline {
+    @apply border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 focus:ring-gray-500/50;
+  }
+
+  .btn-ghost {
+    @apply hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-200 focus:ring-gray-500/50;
+  }
+
+  .icon-btn {
+    @apply p-2 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-accent-500/50;
+  }
+
+  .input {
+    @apply block w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-accent-500/50 focus:border-accent-500/50;
+  }
+
+  .select {
+    @apply block w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-accent-500/50 focus:border-accent-500/50 appearance-none pr-10;
+  }
+
+  .badge {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+  }
+
+  .badge-primary {
+    @apply bg-accent-100 dark:bg-accent-900 text-accent-800 dark:text-accent-200;
+  }
+}
+
+/* Leaflet Overrides */
+.leaflet-container {
+  @apply h-full w-full rounded-lg overflow-hidden transition-all duration-200 ease-in-out;
+}
+
+.leaflet-tooltip {
+  @apply bg-white dark:bg-gray-800 text-gray-900 dark:text-white border border-gray-100 dark:border-gray-700 shadow-md rounded-lg py-2 px-3 transition-all;
+}
+
+.leaflet-tooltip-left:before {
+  @apply border-l-gray-100 dark:border-l-gray-700;
+}
+
+.leaflet-tooltip-right:before {
+  @apply border-r-gray-100 dark:border-r-gray-700;
+}
+
+.leaflet-popup-content-wrapper {
+  @apply bg-white dark:bg-gray-800 text-gray-900 dark:text-white rounded-lg shadow-lg transition-colors;
+}
+
+.leaflet-popup-tip {
+  @apply bg-white dark:bg-gray-800 transition-colors;
+}
+
+.leaflet-popup-close-button {
+  @apply text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors;
+}
+
+.dark-popup .leaflet-popup-content-wrapper, 
+.dark-popup .leaflet-popup-tip {
+  @apply bg-gray-800 text-white;
+}
+
+.leaflet-control-zoom {
+  @apply shadow-md rounded-lg overflow-hidden border border-gray-100 dark:border-gray-700 transition-colors;
+}
+
+.leaflet-control-zoom-in,
+.leaflet-control-zoom-out {
+  @apply bg-white dark:bg-gray-800 text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors;
+}
+
+
+
+/* Recharts Overrides */
+.recharts-text {
+  @apply fill-gray-500 dark:fill-gray-400 transition-colors duration-200;
+}
+
+.recharts-cartesian-grid-horizontal line,
+.recharts-cartesian-grid-vertical line {
+  @apply stroke-gray-200 dark:stroke-gray-700 transition-colors duration-200;
+}
+
+.recharts-tooltip-wrapper .recharts-default-tooltip {
+  @apply bg-white dark:bg-gray-800 text-gray-900 dark:text-white border border-gray-100 dark:border-gray-700 shadow-md rounded-lg py-2 px-3;
+}
+
+
+/* Color Picker */
+input[type="color"] {
+  @apply appearance-none w-10 h-10 border-0 p-0 bg-transparent rounded-lg cursor-pointer overflow-hidden;
+}
+
+input[type="color"]::-webkit-color-swatch-wrapper {
+  @apply p-0;
+}
+
+input[type="color"]::-webkit-color-swatch {
+  @apply border-none rounded-lg;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes slideInUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.animate-slide-in {
+  animation: slideInUp 0.4s ease-out;
+}
+
