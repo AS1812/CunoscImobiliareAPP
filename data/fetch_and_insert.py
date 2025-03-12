@@ -6,6 +6,13 @@ import re
 import random
 import signal
 import sys
+from dotenv import load_dotenv
+import os, path
+
+load_dotenv()
+
+print(os.getenv('MONGO_URI'))
+
 
 # Handle Ctrl+C properly
 def signal_handler(sig, frame):
@@ -41,7 +48,7 @@ def main():
         # Extract pagination information
         total_pages = 1
         try:
-            pagination_items = page.locator('ul[data-cy="react-ui.search.base-pagination.nexus-pagination"] li').all()
+            pagination_items = page.locator('ul[data-cy="frontend.search.base-pagination.nexus-pagination"] li').all()
             for item in pagination_items:
                 text = item.text_content().strip()
                 if text.isdigit() and int(text) > total_pages:
@@ -62,9 +69,9 @@ def main():
         print(f"Found approximately {total_listings} listings across {total_pages} pages")
         
         # Connect to MongoDB
-        client = MongoClient('mongodb://localhost:27017/')
-        db = client['storia']
-        collection = db['rentals']
+        client = MongoClient(os.getenv('MONGO_URI'))
+        db = client['rentals']
+        collection = db['timisoara']
         
         # Progress bar
         progress_bar = tqdm(total=total_listings, desc="Scraping listings")
