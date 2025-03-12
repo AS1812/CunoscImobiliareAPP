@@ -3,10 +3,11 @@ const mongoose = require('mongoose');
 const locationMapper = require('../utils/locationMapper');
 
 // Connect to MongoDB
-mongoose.connect('mongodb://localhost:27017/storia', {
+mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/storia', {
   useNewUrlParser: true,
   useUnifiedTopology: true
 })
+
 .then(() => {
   console.log('MongoDB connected');
   

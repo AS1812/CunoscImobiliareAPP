@@ -1,228 +1,137 @@
-// routes/rentals.js
+// routes/rentals.js - Streamlined version
 const express = require('express');
 const router = express.Router();
 const Rental = require('../models/Rental');
 const fs = require('fs').promises;
 const path = require('path');
 
-// Get all rentals
-router.get('/', async (req, res) => {
+// Very simple endpoint to just check database connection
+router.get('/check', async (req, res) => {
   try {
-    const rentals = await Rental.find();
-    res.json(rentals);
+    // Just count documents to verify connection
+    const count = await Rental.countDocuments().limit(10);
+    res.json({ connected: true, count });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    console.error('Database check failed:', err);
+    res.status(500).json({ error: 'Database check failed', message: err.message });
   }
 });
 
-// Get statistics by room count
-router.get('/stats/:rooms', async (req, res) => {
+// Super light statistics endpoint - minimal processing
+router.get('/stats-lite/:rooms', async (req, res) => {
   try {
     const { rooms } = req.params;
+    const sanitizedRooms = rooms.replace(/[^0-9]/g, '');
     
-    // Aggregate rentals by room count and mapped zone
-            // Ensure rooms param is sanitized
-        const sanitizedRooms = rooms.replace(/[^0-9]/g, '');
-        console.log(`Processing stats for rooms: ${sanitizedRooms}`);
-        
-        const statistics = await Rental.aggregate([
-      {
-        $match: { 
-          'mapped_zone': { $exists: true, $ne: null },
-          'details.rooms': { $regex: new RegExp(`^${sanitizedRooms}( |$)`, 'i') }
-        }
-      },
-      {
-        $group: {
-          _id: '$mapped_zone',
-          PretMediu: { 
-            $avg: { 
-              $cond: [
-                { $eq: ['$price.currency', 'RON'] },
-                { $divide: [{ $toDouble: '$price.amount' }, 4.9] }, // Convert RON to EUR
-                { $toDouble: '$price.amount' }
-              ]
-            } 
-          },
-          PretMinim: { 
-            $min: { 
-              $cond: [
-                { $eq: ['$price.currency', 'RON'] },
-                { $divide: [{ $toDouble: '$price.amount' }, 4.9] },
-                { $toDouble: '$price.amount' }
-              ]
-            } 
-          },
-          PretMaxim: { 
-            $max: { 
-              $cond: [
-                { $eq: ['$price.currency', 'RON'] },
-                { $divide: [{ $toDouble: '$price.amount' }, 4.9] },
-                { $toDouble: '$price.amount' }
-              ]
-            } 
-          },
-          NumarAnunturi: { $sum: 1 },
-          MetriPartrati_InMedie: { 
-            $avg: { 
-              $toDouble: { 
-                $replaceAll: { 
-                  input: '$details.area', 
-                  find: ' m²', 
-                  replacement: '' 
-                } 
-              } 
-            } 
-          }
-        }
-      },
-      {
-        $project: {
-          _id: 0,
-          ZonăApartament: { 
-            $cond: [
-              { $eq: ['$_id', null] },
-              'Unknown Zone',
-              '$_id'
-            ]
-          },
-          PretMediu: { 
-            $cond: [
-              { $eq: ['$PretMediu', null] },
-              0,
-              { $round: ['$PretMediu', 0] }
-            ]
-          },
-          PretMinim: { 
-            $cond: [
-              { $eq: ['$PretMinim', null] },
-              0,
-              { $round: ['$PretMinim', 0] }
-            ]
-          },
-          PretMaxim: { 
-            $cond: [
-              { $eq: ['$PretMaxim', null] },
-              0,
-              { $round: ['$PretMaxim', 0] }
-            ]
-          },
-          NumarAnunturi: { 
-            $cond: [
-              { $eq: ['$NumarAnunturi', null] },
-              0,
-              '$NumarAnunturi'
-            ]
-          },
-          MetriPartrati_InMedie: { 
-            $cond: [
-              { $eq: ['$MetriPartrati_InMedie', null] },
-              0,
-              { $round: ['$MetriPartrati_InMedie', 0] }
-            ]
-          },
-          PretMediu_MetruPatrat: { 
-            $cond: [
-              { $or: [
-                { $eq: ['$PretMediu', null] },
-                { $eq: ['$MetriPartrati_InMedie', null] },
-                { $eq: ['$MetriPartrati_InMedie', 0] }
-              ]},
-              0,
-              { $round: [{ $divide: ['$PretMediu', '$MetriPartrati_InMedie'] }, 0] }
-            ]
-          }
-        }
-      },
-      { $sort: { ZonăApartament: 1 } }
-    ]);
+    // Find just a few documents to validate the query
+    const sample = await Rental.find({
+      'details.rooms': { $regex: new RegExp(`^${sanitizedRooms}( |$)`, 'i') }
+    }).limit(5).lean();
     
-    res.json(statistics);
+    // Return a simplified response
+    res.json({
+      success: true,
+      count: sample.length,
+      message: "Using simplified endpoint due to serverless limitations",
+      sample
+    });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    console.error('Error in stats-lite:', err);
+    res.status(500).json({ error: 'Stats query failed', message: err.message });
   }
 });
 
-// Get map data with statistics
-router.get('/map', async (req, res) => {
+// Super simple map endpoint with no database connection
+router.get('/map-static', async (req, res) => {
   try {
-    // Get GeoJSON file
-    let geojsonPath = path.join(__dirname, '../../frontend/public/map.geojson');
+    // Just return the static GeoJSON file
+    const geojsonPath = path.join(__dirname, '../map.geojson');
+    console.log('Loading static GeoJSON from:', geojsonPath);
     
-    // Check if file exists at that path, if not try in the backend directory
-    try {
-      await fs.access(geojsonPath);
-    } catch (err) {
-      console.log('GeoJSON not found in frontend/public, trying backend directory');
-      geojsonPath = path.join(__dirname, '../map.geojson');
-    }
-    
-    console.log('Loading GeoJSON from:', geojsonPath);
     const geojsonData = await fs.readFile(geojsonPath, 'utf8');
     const geojson = JSON.parse(geojsonData);
     
     console.log('GeoJSON loaded successfully with', geojson.features.length, 'features');
     
-    // Aggregate statistics for all zones
+    // Add some example data to verify it's working
+    if (geojson.features && geojson.features.length) {
+      geojson.features = geojson.features.map(feature => ({
+        ...feature,
+        properties: {
+          ...feature.properties,
+          // Add some placeholder data
+          sampleData: {
+            price: Math.floor(Math.random() * 500) + 200,
+            listings: Math.floor(Math.random() * 20) + 1
+          }
+        }
+      }));
+    }
+    
+    res.json(geojson);
+  } catch (err) {
+    console.error('Error in map-static:', err);
+    res.status(500).json({ error: 'GeoJSON loading failed', message: err.message });
+  }
+});
+
+// Keep the original routes, but they might time out in serverless
+router.get('/stats/:rooms', async (req, res) => {
+  try {
+    const { rooms } = req.params;
+    const sanitizedRooms = rooms.replace(/[^0-9]/g, '');
+    
+    // Using count only for quick estimation
+    const count = await Rental.countDocuments({
+      'details.rooms': { $regex: new RegExp(`^${sanitizedRooms}( |$)`, 'i') }
+    });
+    
+    if (count > 200) {
+      return res.json({
+        message: "Too many records for serverless function. Try /stats-lite endpoint instead.",
+        count
+      });
+    }
+    
+    // Simplified aggregation for small datasets only
     const statistics = await Rental.aggregate([
       {
-        $match: { 'mapped_zone': { $ne: 'Unknown' } }
+        $match: { 
+          'details.rooms': { $regex: new RegExp(`^${sanitizedRooms}( |$)`, 'i') }
+        }
       },
+      { $limit: 200 }, // Hard limit to prevent timeout
       {
         $group: {
           _id: '$mapped_zone',
-          PretMediu: { 
-            $avg: { 
-              $cond: [
-                { $eq: ['$price.currency', 'RON'] },
-                { $divide: [{ $toDouble: '$price.amount' }, 4.9] },
-                { $toDouble: '$price.amount' }
-              ]
-            } 
-          },
+          PretMediu: { $avg: { $toDouble: '$price.amount' } },
+          PretMinim: { $min: { $toDouble: '$price.amount' } },
+          PretMaxim: { $max: { $toDouble: '$price.amount' } },
           NumarAnunturi: { $sum: 1 }
         }
       },
       {
         $project: {
           _id: 0,
-          zone: '$_id',
+          ZonăApartament: '$_id',
           PretMediu: { $round: ['$PretMediu', 0] },
+          PretMinim: { $round: ['$PretMinim', 0] },
+          PretMaxim: { $round: ['$PretMaxim', 0] },
           NumarAnunturi: 1
         }
       }
     ]);
     
-    console.log('Statistics aggregated for', statistics.length, 'zones');
-    
-    // Convert statistics array to object for easier lookup
-    const statsMap = {};
-    statistics.forEach(stat => {
-      statsMap[stat.zone] = stat;
-    });
-    
-    // Merge statistics into GeoJSON properties
-    geojson.features = geojson.features.map(feature => {
-      const zoneName = feature.properties.text;
-      const zoneStats = statsMap[zoneName] || {};
-      
-      return {
-        ...feature,
-        properties: {
-          ...feature.properties,
-          ...zoneStats
-        }
-      };
-    });
-    
-    res.json(geojson);
+    res.json(statistics);
   } catch (err) {
-    console.error('Error handling map data:', err);
+    console.error('Error in full stats:', err);
     res.status(500).json({ 
+      error: 'Stats aggregation failed', 
       message: err.message,
-      stack: process.env.NODE_ENV === 'production' ? '🥞' : err.stack
+      suggestion: 'Try using /stats-lite endpoint instead'
     });
   }
 });
 
+// Export the router
 module.exports = router;

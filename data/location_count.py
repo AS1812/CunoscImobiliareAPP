@@ -4,8 +4,8 @@ from pymongo import MongoClient
 def main():
     # Connect to MongoDB (adjust connection string if needed)
     client = MongoClient('mongodb://localhost:27017/')
-    db = client['storia']
-    collection = db['rentals']
+    db = client['rentals']
+    collection = db['timisoara']
     
     # Aggregation pipeline: group by location and count listings for each
     pipeline = [

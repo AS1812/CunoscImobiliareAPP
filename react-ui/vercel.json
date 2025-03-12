@@ -1,0 +1,26 @@
+{
+    "version": 2,
+    "framework": "create-react-app",
+    "routes": [
+      {
+        "src": "/static/(.*)",
+        "dest": "/static/$1"
+      },
+      {
+        "src": "/favicon.ico",
+        "dest": "/favicon.ico"
+      },
+      {
+        "src": "/manifest.json",
+        "dest": "/manifest.json"
+      },
+      {
+        "src": "/map.geojson",
+        "dest": "/map.geojson"
+      },
+      {
+        "src": "/(.*)",
+        "dest": "/index.html"
+      }
+    ]
+  }

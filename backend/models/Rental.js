@@ -24,6 +24,9 @@ const rentalSchema = new mongoose.Schema({
   
   // Added field to store the mapped zone from GeoJSON
   mapped_zone: String
+}, { 
+  // Specify the collection name explicitly
+  collection: 'timisoara' 
 });
 
 module.exports = mongoose.model('Rental', rentalSchema);

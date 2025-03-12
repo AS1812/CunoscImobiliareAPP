@@ -1,0 +1,21 @@
+{
+    "version": 2,
+    "builds": [
+      { 
+        "src": "server.js", 
+        "use": "@vercel/node",
+        "config": {
+          "maxLambdaSize": "50mb"
+        }
+      }
+    ],
+    "routes": [
+      { "src": "/", "dest": "server.js" },
+      { "src": "/api/health", "dest": "server.js" },
+      { "src": "/api/debug-env", "dest": "server.js" },
+      { "src": "/api/rentals/map-static", "dest": "server.js" },
+      { "src": "/api/rentals/stats-lite/(.*)", "dest": "server.js" },
+      { "src": "/api/rentals/check", "dest": "server.js" },
+      { "src": "/api/rentals/(.*)", "dest": "server.js" }
+    ]
+  }
