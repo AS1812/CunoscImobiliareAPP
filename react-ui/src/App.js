@@ -1,4 +1,4 @@
-// src/App.js
+// src/App.js - Never uses estimated data
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { ThemeProvider } from './contexts/ThemeContext';
@@ -7,6 +7,21 @@ import Dashboard from './components/Dashboard';
 // Use environment variable for API URL with fallback
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5001/api';
 
+// Define list of known zones to ensure consistent data
+const KNOWN_ZONES = [
+  'Timisoara, zona Cetatii',
+  'Timisoara, zona Telegrafului',
+  'Timisoara, zona Dorobantilor',
+  'Timisoara, zona Lipovei',
+  'Timisoara, zona Aradului',
+  'Timisoara, zona Elisabetin',
+  'Timisoara, zona Iosefin',
+  'Timisoara, zona Blascovici',
+  'Timisoara, zona Torontalului',
+  'Timisoara, zona Fabric',
+  'Timisoara, zona Complex Studentesc'
+];
+
 function App() {
   const [selectedRooms, setSelectedRooms] = useState('1');
   const [selectedMetric, setSelectedMetric] = useState('PretMediu');
@@ -14,6 +29,8 @@ function App() {
   const [mapData, setMapData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [dbStats, setDbStats] = useState(null);
+  const [dataSource, setDataSource] = useState('api'); // Always 'api'
 
   const metrics = [
     { value: 'PretMediu', label: 'Average Price' },
@@ -29,128 +46,149 @@ function App() {
     { value: '1', label: '1 Room' },
     { value: '2', label: '2 Rooms' },
     { value: '3', label: '3 Rooms' },
-    { value: '4', label: '4 Rooms' }
+    { value: '4', label: '4+ Rooms' }
   ];
 
+  // Fetch database stats once at startup
+  useEffect(() => {
+    const fetchDatabaseStats = async () => {
+      try {
+        console.log('Fetching database stats...');
+        const response = await axios.get(`${API_URL}/rentals/database-stats`);
+        if (response.data && response.data.totalListings) {
+          setDbStats(response.data);
+          console.log(`Database contains ${response.data.totalListings} listings`);
+        }
+      } catch (err) {
+        console.warn('Could not fetch database stats:', err.message);
+      }
+    };
+    
+    fetchDatabaseStats();
+  }, []);
+
+  // Fetch data when selected rooms change
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
       setError(null);
       
       try {
-        console.log('Fetching data from:', API_URL);
+        console.log(`Fetching data for ${selectedRooms} room(s) from: ${API_URL}`);
         
-        // First, check if the API is accessible
+        // First check database health
+        let databaseConnected = false;
         try {
-          await axios.get(`${API_URL}/health`);
+          const healthResponse = await axios.get(`${API_URL}/rentals/health`);
+          databaseConnected = healthResponse.data.status === 'ok';
+          console.log(`Database health check: ${databaseConnected ? 'Connected' : 'Disconnected'}`);
+          
+          if (!databaseConnected) {
+            throw new Error('Database not connected');
+          }
         } catch (healthError) {
-          console.warn('Health check failed, continuing anyway');
+          console.error('Health check failed:', healthError.message);
+          throw new Error('Could not connect to the database. Please try again later.');
         }
         
-        // Try to get data using the optimized endpoints first
-        try {
-          // Try the lightweight stats endpoint first
-          const statsLiteResponse = await axios.get(`${API_URL}/rentals/stats-lite/${selectedRooms}`);
-          console.log('Using lightweight stats endpoint');
-          
-          if (statsLiteResponse.data && statsLiteResponse.data.sample) {
-            // If we get the lightweight response, generate some dummy statistics
-            // This is just placeholder data until you can get the real stats working
-            const dummyStats = generateDummyStatistics(selectedRooms);
-            setStatistics(dummyStats);
-          }
-        } catch (liteError) {
-          console.warn('Lightweight stats failed, trying regular endpoint', liteError);
-          
-          // Fall back to the normal stats endpoint
-          const statsResponse = await axios.get(`${API_URL}/rentals/stats/${selectedRooms}`);
-          console.log('Statistics response:', statsResponse.data);
-          
-          // Ensure the data is an array and has the expected structure
-          const validatedStats = Array.isArray(statsResponse.data) 
-            ? statsResponse.data.filter(item => item && typeof item === 'object')
-            : [];
-            
-          setStatistics(validatedStats);
+        // Get statistics data
+        const statsResponse = await axios.get(`${API_URL}/rentals/stats/${selectedRooms}`);
+        
+        if (!Array.isArray(statsResponse.data)) {
+          throw new Error('Invalid statistics data format (not an array)');
         }
         
-        // Try the static map endpoint first (faster)
-        try {
-          const mapStaticResponse = await axios.get(`${API_URL}/rentals/map-static`);
-          console.log('Using static map endpoint');
-          
-          if (mapStaticResponse.data && mapStaticResponse.data.features) {
-            setMapData(mapStaticResponse.data);
-          } else {
-            throw new Error('Invalid static map data');
+        console.log(`Received ${statsResponse.data.length} zones from statistics endpoint`);
+        
+        // Ensure we have data for all known zones
+        const statsData = [...statsResponse.data];
+        const existingZones = new Set(statsData.map(item => item.ZonăApartament));
+        
+        // Add any missing zones with zero values
+        for (const zone of KNOWN_ZONES) {
+          if (!existingZones.has(zone)) {
+            statsData.push({
+              ZonăApartament: zone,
+              PretMediu: 0,
+              PretMinim: 0,
+              PretMaxim: 0,
+              MetriPartrati_InMedie: 0,
+              PretMediu_MetruPatrat: 0,
+              NumarAnunturi: 0
+            });
           }
-        } catch (staticMapError) {
-          console.warn('Static map failed, trying regular endpoint', staticMapError);
-          
-          // Fall back to the normal map endpoint
+        }
+        
+        // Sort by number of listings
+        statsData.sort((a, b) => b.NumarAnunturi - a.NumarAnunturi);
+        
+        // Set the statistics state
+        setStatistics(statsData);
+        
+        // Now get the map data
+        try {
+          // Try the enhanced map endpoint first
           const mapResponse = await axios.get(`${API_URL}/rentals/map`);
-          console.log('Map data response:', mapResponse.data);
           
           if (mapResponse.data && mapResponse.data.features) {
+            console.log(`Received map data with ${mapResponse.data.features.length} features`);
             setMapData(mapResponse.data);
           } else {
-            console.error('Invalid map data structure:', mapResponse.data);
-            setError('Invalid map data structure received from server');
+            throw new Error('Invalid map data structure');
+          }
+        } catch (mapError) {
+          console.warn('Map endpoint failed, trying static map:', mapError.message);
+          
+          // Try the static map endpoint
+          try {
+            const staticMapResponse = await axios.get(`${API_URL}/rentals/map-static`);
+            
+            if (staticMapResponse.data && staticMapResponse.data.features) {
+              console.log('Using static map data');
+              
+              // Enhance the map with our statistics data
+              const enhancedFeatures = staticMapResponse.data.features.map(feature => {
+                const zoneName = feature.properties.text;
+                const zoneStats = statsData.find(stat => stat.ZonăApartament === zoneName);
+                
+                return {
+                  ...feature,
+                  properties: {
+                    ...feature.properties,
+                    statistics: zoneStats ? {
+                      count: zoneStats.NumarAnunturi,
+                      avgPrice: zoneStats.PretMediu
+                    } : {
+                      count: 0,
+                      avgPrice: 0
+                    }
+                  }
+                };
+              });
+              
+              setMapData({
+                ...staticMapResponse.data,
+                features: enhancedFeatures
+              });
+            } else {
+              throw new Error('Invalid static map data');
+            }
+          } catch (staticMapError) {
+            console.error('All map endpoints failed:', staticMapError.message);
+            throw new Error('Could not load map data. Please try again later.');
           }
         }
         
         setLoading(false);
       } catch (err) {
         console.error('Error fetching data:', err);
-        const errorMessage = err.response 
-          ? `Error: ${err.response.status} ${err.response.statusText}` 
-          : err.message === 'Network Error'
-            ? `Network error: Unable to connect to ${API_URL}`
-            : 'Failed to load data. Please try again.';
-        
-        setError(errorMessage);
+        setError(err.message || 'Failed to load data. Please check your connection and try again.');
         setLoading(false);
       }
     };
     
     fetchData();
-  }, [selectedRooms, API_URL]);
-
-  // Function to generate temporary statistics if the API can't provide them
-  const generateDummyStatistics = (rooms) => {
-    const zones = [
-      'Timisoara, zona Cetatii',
-      'Timisoara, zona Telegrafului',
-      'Timisoara, zona Dorobantilor',
-      'Timisoara, zona Lipovei',
-      'Timisoara, zona Aradului',
-      'Timisoara, zona Elisabetin',
-      'Timisoara, zona Iosefin',
-      'Timisoara, zona Blascovici',
-      'Timisoara, zona Torontalului',
-      'Timisoara, zona Fabric',
-      'Timisoara, zona Complex Studentesc'
-    ];
-    
-    // Generate different price ranges based on room count
-    const basePrice = parseInt(rooms) * 150;
-    
-    return zones.map(zone => {
-      // Add some randomness to make the data look real
-      const variation = Math.random() * 0.5 + 0.8; // Between 0.8 and 1.3
-      const priceBase = basePrice * variation;
-      
-      return {
-        ZonăApartament: zone,
-        PretMediu: Math.round(priceBase),
-        PretMinim: Math.round(priceBase * 0.8),
-        PretMaxim: Math.round(priceBase * 1.2),
-        PretMediu_MetruPatrat: Math.round(priceBase / (20 + parseInt(rooms) * 15)),
-        NumarAnunturi: Math.floor(Math.random() * 20) + 1,
-        MetriPartrati_InMedie: 20 + parseInt(rooms) * 15
-      };
-    });
-  };
+  }, [selectedRooms]);
 
   return (
     <ThemeProvider>
@@ -165,6 +203,8 @@ function App() {
         setSelectedMetric={setSelectedMetric}
         metrics={metrics}
         roomOptions={roomOptions}
+        dbStats={dbStats}
+        dataSource="api" // Always use real data
       />
     </ThemeProvider>
   );

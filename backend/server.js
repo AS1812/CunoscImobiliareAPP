@@ -1,15 +1,16 @@
-// server.js
+// server.js - Fixed to handle MongoDB connection properly
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const rentalRoutes = require('./routes/rentals');
 const path = require('path');
+require('dotenv').config();
 
 const app = express();
 
-// CORS configuration for Vercel deployment
+// CORS configuration
 app.use(cors({
-  origin: '*', // Temporarily allow all origins while debugging
+  origin: '*',
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   credentials: true
 }));
@@ -19,6 +20,9 @@ app.use(express.json());
 
 // Handle preflight requests
 app.options('*', cors());
+
+// Serve static files from the root directory (for map.geojson)
+app.use(express.static(path.join(__dirname, '.')));
 
 // Add a simple homepage route that doesn't require DB connection
 app.get('/', (req, res) => {
@@ -36,10 +40,14 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// Debug endpoint to verify environment variables
+// Debug endpoint to verify environment variables (safely)
 app.get('/api/debug-env', (req, res) => {
+  const mongoUri = process.env.MONGO_URI || 'not set';
+  
   res.json({
-    mongoUri: process.env.MONGO_URI ? 'Set (first few chars: ' + process.env.MONGO_URI.substring(0, 15) + '...)' : 'Not set',
+    mongoUri: mongoUri !== 'not set' ? 
+      `Set (first few chars: ${mongoUri.substring(0, 10)}...)` : 
+      'Not set',
     nodeEnv: process.env.NODE_ENV,
     vercel: process.env.VERCEL ? 'Yes' : 'No'
   });
@@ -63,13 +71,19 @@ app.get('/api/rentals/map-static', async (req, res) => {
 // Separate routes that require database connection
 const connectDB = async () => {
   try {
-    // Get the MongoDB URI from environment variables
-    const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/rentals';
-    console.log('Connecting to MongoDB...');
-    console.log('URI length:', MONGO_URI.length);
-    console.log('URI starts with:', MONGO_URI.substring(0, 20));
+    // Get the MongoDB URI from environment variables with clear fallback
+    const MONGO_URI = process.env.MONGO_URI;
     
-    // Connect to MongoDB with optimized settings for Vercel
+    if (!MONGO_URI) {
+      console.error('MONGO_URI environment variable is not set');
+      console.log('Falling back to default local MongoDB URI');
+      // Return false to indicate we couldn't connect
+      return false;
+    }
+    
+    console.log('Connecting to MongoDB...');
+    
+    // Connect to MongoDB with optimized settings
     await mongoose.connect(MONGO_URI, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
@@ -96,7 +110,7 @@ app.use('/api/rentals', async (req, res, next) => {
       const connected = await connectDB();
       if (!connected) {
         return res.status(500).json({ 
-          error: 'Database connection failed. Try using static endpoints.' 
+          error: 'Database connection failed. Please check your MongoDB connection string.' 
         });
       }
     }

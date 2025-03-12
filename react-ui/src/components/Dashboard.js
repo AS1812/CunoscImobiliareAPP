@@ -1,4 +1,4 @@
-// src/components/Dashboard.js
+// src/components/Dashboard.js - Updated to display data source
 import React, { useState, useEffect } from 'react';
 import ThemeSwitcher from './ThemeSwitcher';
 import ColorPalette from './ColorPalette';
@@ -24,22 +24,58 @@ const Dashboard = ({
   selectedMetric,
   setSelectedMetric,
   metrics,
-  roomOptions
+  roomOptions,
+  dbStats,
+  dataSource
 }) => {
   const { accentColor } = useTheme();
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(false); // Default closed on mobile
   const [showWelcome, setShowWelcome] = useState(true);
   const [lastUpdate] = useState(new Date());
 
-  // Check if it's first visit (could be stored in localStorage in a real app)
+  // Set sidebar open by default on larger screens
   useEffect(() => {
-    // In a real app, you might check localStorage here
+    // Check if the screen is large enough for desktop view
+    const isDesktop = window.matchMedia('(min-width: 1024px)').matches;
+    if (isDesktop) {
+      setSidebarOpen(true);
+    }
+  }, []);
+
+  // Close sidebar when selecting an option on mobile
+  const handleMobileSelect = (newValue, setter) => {
+    setter(newValue);
+    // Only close sidebar on mobile
+    if (window.innerWidth < 1024) {
+      setSidebarOpen(false);
+    }
+  };
+
+  // Handle window resize
+  useEffect(() => {
+    const handleResize = () => {
+      const isDesktop = window.matchMedia('(min-width: 1024px)').matches;
+      // Keep sidebar open in desktop view regardless of previous state
+      if (isDesktop) {
+        setSidebarOpen(true);
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // Check if it's first visit
+  useEffect(() => {
     const timer = setTimeout(() => {
       setShowWelcome(false);
     }, 8000);
     
     return () => clearTimeout(timer);
   }, []);
+
+  // Count total listings in current statistics
+  const totalListingsForSelection = statistics.reduce((sum, zone) => sum + zone.NumarAnunturi, 0);
 
   if (loading) {
     return (
@@ -76,17 +112,60 @@ const Dashboard = ({
     );
   }
 
+  // Get an appropriate notification message based on the data source
+  const getDataSourceNotification = () => {
+    if (dataSource === 'api') {
+      if (dbStats) {
+        return {
+          type: 'success',
+          message: `Using real data from ${dbStats.totalListings.toLocaleString()} listings. Currently showing ${totalListingsForSelection.toLocaleString()} listings for ${selectedRooms} room apartments.`
+        };
+      } else {
+        return {
+          type: 'success',
+          message: `Using real data from the database. Currently showing ${totalListingsForSelection.toLocaleString()} listings for ${selectedRooms} room apartments.`
+        };
+      }
+    } else if (dataSource === 'fallback') {
+      return {
+        type: 'warning',
+        message: 'Using estimated data. The database connection is currently unavailable. Data shown is approximate.'
+      };
+    } else {
+      return null;
+    }
+  };
+
+  const dataSourceNotification = getDataSourceNotification();
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white transition-colors duration-200">
+      {/* Mobile Sidebar Overlay - only visible when sidebar is open on mobile */}
+      {sidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 z-20 lg:hidden"
+          onClick={() => setSidebarOpen(false)}
+          aria-hidden="true"
+        ></div>
+      )}
+      
       <div className="flex">
         {/* Sidebar */}
-        <aside className={`${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} fixed lg:relative inset-y-0 left-0 z-10 w-64 bg-white dark:bg-gray-800 shadow-lg lg:shadow-none border-r border-gray-100 dark:border-gray-700 lg:translate-x-0 transform transition-transform duration-200 ease-in-out`}>
+        <aside 
+          className={`fixed lg:relative inset-y-0 left-0 z-30 w-64 bg-white dark:bg-gray-800 shadow-lg lg:shadow-none border-r border-gray-100 dark:border-gray-700 transform transition-transform duration-200 ease-in-out ${
+            sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+          }`}
+        >
           <div className="flex flex-col h-full">
             <div className="p-4 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between">
-              <h1 className="text-xl font-bold text-accent-500">Rent Stats</h1>
-              <button className="lg:hidden icon-btn" onClick={() => setSidebarOpen(false)}>
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+              <h1 className="text-xl font-bold text-accent-500" style={{ color: accentColor }}>Rent Stats</h1>
+              <button 
+                className="lg:hidden text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 focus:outline-none" 
+                onClick={() => setSidebarOpen(false)}
+                aria-label="Close sidebar"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
             </div>
@@ -94,20 +173,62 @@ const Dashboard = ({
             <div className="p-4 flex-1 overflow-y-auto custom-scrollbar">
               <FilterPanel
                 selectedRooms={selectedRooms}
-                setSelectedRooms={setSelectedRooms}
+                setSelectedRooms={(value) => handleMobileSelect(value, setSelectedRooms)}
                 selectedMetric={selectedMetric}
-                setSelectedMetric={setSelectedMetric}
+                setSelectedMetric={(value) => handleMobileSelect(value, setSelectedMetric)}
                 metrics={metrics}
                 roomOptions={roomOptions}
                 statistics={statistics}
               />
               
-
+              {/* Database Stats Section */}
+              <div className="mt-6 bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+                <h3 className="font-medium text-sm mb-2 text-gray-700 dark:text-gray-300">Statistics</h3>
+                <div className="space-y-2 text-xs">
+                  <div className="flex justify-between">
+                    <span>Total Listings:</span>
+                    <span className="font-medium">{dbStats ? dbStats.totalListings.toLocaleString() : 'Unknown'}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Current Selection:</span>
+                    <span className="font-medium">{totalListingsForSelection.toLocaleString()} listings</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Data Source:</span>
+                    <span className={`font-medium ${dataSource === 'fallback' ? 'text-yellow-500' : 'text-green-500'}`}>
+                      {dataSource === 'api' ? 'Database' : dataSource === 'fallback' ? 'Estimated' : 'Loading...'}
+                    </span>
+                  </div>
+                  
+                  {dbStats && dbStats.roomDistribution && dbStats.roomDistribution.length > 0 && (
+                    <div className="pt-2">
+                      <div className="text-xs font-medium mb-1">Room Distribution:</div>
+                      <div className="space-y-1">
+                        {dbStats.roomDistribution.slice(0, 5).map((item, index) => (
+                          <div key={index} className="flex justify-between text-xs">
+                            <span>{item._id || 'Unknown'}:</span>
+                            <span>{item.count.toLocaleString()}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
 
             <div className="p-4 border-t border-gray-100 dark:border-gray-700">
               <div className="text-xs text-gray-500 dark:text-gray-400">
                 Timișoara Real Estate Statistics
+                <div className="mt-1">
+                  {dbStats ? (
+                    <span>
+                      Data: {new Date(dbStats.timestamp).toLocaleDateString()}
+                    </span>
+                  ) : (
+                    <span>Data loaded: {lastUpdate.toLocaleDateString()}</span>
+                  )}
+                </div>
               </div>
             </div>
           </div>
@@ -118,19 +239,20 @@ const Dashboard = ({
           <div className="sticky top-0 z-10 bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700 px-4 py-3 flex items-center justify-between">
             <div className="flex items-center">
               <button
-                className="lg:hidden mr-2 icon-btn"
+                className="lg:hidden mr-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 focus:outline-none"
                 onClick={() => setSidebarOpen(true)}
+                aria-label="Open sidebar"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 15a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" />
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
                 </svg>
               </button>
               <h2 className="text-lg font-semibold">Timișoara Rent Dashboard</h2>
             </div>
             <div className="flex items-center space-x-2">
               <span className="hidden md:inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 border border-gray-200 dark:border-gray-600">
-                  {selectedRooms} Room{selectedRooms !== '1' && 's'} • {metrics.find(m => m.value === selectedMetric)?.label}
-                </span>
+                {selectedRooms} Room{selectedRooms !== '1' && 's'} • {metrics.find(m => m.value === selectedMetric)?.label}
+              </span>
               <div className="ml-2 flex items-center space-x-2">
                 <ColorPalette />
                 <ThemeSwitcher />
@@ -139,7 +261,16 @@ const Dashboard = ({
           </div>
 
           <div className="p-4 md:p-6">
-            {showWelcome && (
+            {dataSourceNotification && (
+              <NotificationAlert
+                type={dataSourceNotification.type}
+                message={dataSourceNotification.message}
+                dismissible={true}
+                timeout={8000}
+              />
+            )}
+            
+            {showWelcome && !dataSourceNotification && (
               <NotificationAlert
                 type="info"
                 message="Welcome to the Real Estate Dashboard! This dashboard provides insights into Timișoara's real estate market based on current listings."
@@ -152,6 +283,7 @@ const Dashboard = ({
               statistics={statistics} 
               selectedMetric={selectedMetric} 
               selectedRooms={selectedRooms}
+              dataSource={dataSource}
             />
             
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6 mb-6">
@@ -159,6 +291,9 @@ const Dashboard = ({
                 <div className="card animate-fade-in">
                   <div className="card-header">
                     <h3 className="card-title">Real Estate Map</h3>
+                    {dataSource === 'fallback' && (
+                      <span className="text-xs text-yellow-500">Estimated data</span>
+                    )}
                   </div>
                   <div className="card-body p-0 relative">
                     <div className="h-96 md:h-[500px]">
@@ -166,7 +301,6 @@ const Dashboard = ({
                         mapData={mapData} 
                         statistics={statistics} 
                         selectedMetric={selectedMetric}
-                        accentColor={accentColor}
                       />
                       <MapOverlay 
                         position="bottom-left"
@@ -187,6 +321,7 @@ const Dashboard = ({
                     <StatisticsPanel 
                       statistics={statistics} 
                       selectedMetric={selectedMetric} 
+                      dataSource={dataSource}
                     />
                   </div>
                 </div>
@@ -227,7 +362,7 @@ const Dashboard = ({
             
             <div className="card animate-fade-in animate-delay-300 mb-6">
               <div className="card-header">
-                <h3 className="card-title">Area vs {selectedMetric} Correlation</h3>
+                <h3 className="card-title">Area vs {metrics.find(m => m.value === selectedMetric)?.label} Correlation</h3>
               </div>
               <div className="card-body">
                 <div className="h-80">
@@ -242,6 +377,11 @@ const Dashboard = ({
             
             <footer className="text-center text-gray-500 text-sm py-4">
               <p>© {new Date().getFullYear()} Timișoara Real Estate Statistics</p>
+              {dataSource === 'fallback' && (
+                <p className="text-xs mt-1 text-yellow-500">
+                  * Using estimated data - database connection unavailable
+                </p>
+              )}
             </footer>
           </div>
         </main>
